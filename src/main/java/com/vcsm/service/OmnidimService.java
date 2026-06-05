@@ -1,6 +1,7 @@
 package com.vcsm.service;
 
 import com.vcsm.model.VoiceCommand;
+import com.vcsm.model.Complaint;
 import com.vcsm.repository.VoiceCommandRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -65,7 +66,14 @@ public class OmnidimService {
         else if (t.contains("maintenance") || t.contains("broken")) cat = "maintenance";
         else if (t.contains("security")) cat = "security";
         else if (t.contains("parking")) cat = "parking";
-        return "Detected a " + cat + " issue. Please fill the complaint form with your name and details.";
+
+        Complaint complaint = new Complaint();
+        complaint.setResidentName("Voice Command");
+        complaint.setDescription(t);
+        complaint.setCategory(Complaint.ComplaintCategory.valueOf(cat.toUpperCase()));
+        complaintService.fileComplaint(complaint);
+
+        return "Complaint filed successfully for " + cat + " issue. Reference ID: " + complaint.getId();
     }
 
     private String handleStatusCheck() {
