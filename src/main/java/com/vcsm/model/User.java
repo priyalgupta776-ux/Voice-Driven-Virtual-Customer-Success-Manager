@@ -22,13 +22,23 @@ public class User {
     private String password;
     
     @Column(name = "preferred_language")
-private String preferredLanguage = "en";
-
+    private String preferredLanguage = "en";
+    
     @Column(name = "is_voice_enrolled")
     private boolean isVoiceEnrolled = false;
     
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+    
+    // Profile Fields
+    @Column(name = "phone")
+    private String phone;
+    
+    @Column(name = "profile_image")
+    private String profileImage;
+    
+    @Column(name = "last_active")
+    private LocalDateTime lastActive;
     
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Complaint> complaints = new ArrayList<>();
@@ -36,6 +46,7 @@ private String preferredLanguage = "en";
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private VoicePrint voicePrint;
     
+    // Constructors
     public User() {}
     
     public User(String email, String name, String password) {
@@ -45,31 +56,31 @@ private String preferredLanguage = "en";
         this.createdAt = LocalDateTime.now();
     }
     
-    // Getters and Setters
+    // ---- Getters ----
     public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    
     public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-    
     public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-    
     public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
-    
-    public boolean isVoiceEnrolled() { return isVoiceEnrolled; }
-    public void setVoiceEnrolled(boolean voiceEnrolled) { isVoiceEnrolled = voiceEnrolled; }
-    
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-    
-    public List<Complaint> getComplaints() { return complaints; }
-    public void setComplaints(List<Complaint> complaints) { this.complaints = complaints; }
-    
-    public VoicePrint getVoicePrint() { return voicePrint; }
-    public void setVoicePrint(VoicePrint voicePrint) { this.voicePrint = voicePrint; }
-
     public String getPreferredLanguage() { return preferredLanguage; }
-public void setPreferredLanguage(String preferredLanguage) { this.preferredLanguage = preferredLanguage; }
+    public boolean isVoiceEnrolled() { return isVoiceEnrolled; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public String getPhone() { return phone; }
+    public String getProfileImage() { return profileImage; }
+    public LocalDateTime getLastActive() { return lastActive; }
+    public List<Complaint> getComplaints() { return complaints; }
+    public VoicePrint getVoicePrint() { return voicePrint; }
+    
+    // ---- Setters ----
+    public void setId(Long id) { this.id = id; }
+    public void setEmail(String email) { this.email = email; }
+    public void setName(String name) { this.name = name; }
+    public void setPassword(String password) { this.password = password; }
+    public void setPreferredLanguage(String preferredLanguage) { this.preferredLanguage = preferredLanguage; }
+    public void setVoiceEnrolled(boolean voiceEnrolled) { isVoiceEnrolled = voiceEnrolled; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public void setPhone(String phone) { this.phone = phone; }
+    public void setProfileImage(String profileImage) { this.profileImage = profileImage; }
+    public void setLastActive(LocalDateTime lastActive) { this.lastActive = lastActive; }
+    public void setComplaints(List<Complaint> complaints) { this.complaints = complaints; }
+    public void setVoicePrint(VoicePrint voicePrint) { this.voicePrint = voicePrint; }
 }
