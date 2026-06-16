@@ -40,6 +40,16 @@ public class User {
     @Column(name = "last_active")
     private LocalDateTime lastActive;
     
+    // Notification Preferences
+    @Column(name = "email_notifications")
+    private boolean emailNotifications = true;
+    
+    @Column(name = "sms_notifications")
+    private boolean smsNotifications = false;
+    
+    @Column(name = "phone_number")
+    private String phoneNumber;
+    
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Complaint> complaints = new ArrayList<>();
     
@@ -54,6 +64,8 @@ public class User {
         this.name = name;
         this.password = password;
         this.createdAt = LocalDateTime.now();
+        this.emailNotifications = true;
+        this.smsNotifications = false;
     }
     
     // ---- Getters ----
@@ -67,6 +79,9 @@ public class User {
     public String getPhone() { return phone; }
     public String getProfileImage() { return profileImage; }
     public LocalDateTime getLastActive() { return lastActive; }
+    public boolean isEmailNotifications() { return emailNotifications; }
+    public boolean isSmsNotifications() { return smsNotifications; }
+    public String getPhoneNumber() { return phoneNumber; }
     public List<Complaint> getComplaints() { return complaints; }
     public VoicePrint getVoicePrint() { return voicePrint; }
     
@@ -81,6 +96,9 @@ public class User {
     public void setPhone(String phone) { this.phone = phone; }
     public void setProfileImage(String profileImage) { this.profileImage = profileImage; }
     public void setLastActive(LocalDateTime lastActive) { this.lastActive = lastActive; }
+    public void setEmailNotifications(boolean emailNotifications) { this.emailNotifications = emailNotifications; }
+    public void setSmsNotifications(boolean smsNotifications) { this.smsNotifications = smsNotifications; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
     public void setComplaints(List<Complaint> complaints) { this.complaints = complaints; }
     public void setVoicePrint(VoicePrint voicePrint) { this.voicePrint = voicePrint; }
 }
