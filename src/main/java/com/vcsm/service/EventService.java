@@ -1,7 +1,11 @@
 package com.vcsm.service;
 
 import com.vcsm.model.Event;
+import com.vcsm.model.User;
+import com.vcsm.model.EventRegistration;
 import com.vcsm.repository.EventRepository;
+import com.vcsm.repository.UserRepository;
+import com.vcsm.repository.EventRegistrationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -13,6 +17,12 @@ public class EventService {
 
     @Autowired
     private EventRepository eventRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private EventRegistrationRepository eventRegistrationRepository;
 
     public Event createEvent(Event event) { return eventRepository.save(event); }
 
@@ -42,20 +52,27 @@ public class EventService {
         return eventRepository.save(event);
     }
 
-    public Event registerForEvent(Long id) {
-        Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Event not found: " + id));
+    public Event registerForEvent(Long eventId, Long userId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new RuntimeException("Event not found: " + eventId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+
         // Event inactive
         if (!event.isActive()) {
-          throw new RuntimeException("Event is not active");
+            throw new RuntimeException("Event is not active");
         }
         // Event already happened
         if (event.getEventDate().isBefore(LocalDateTime.now())) {
             throw new RuntimeException("Registration closed. Event already started.");
         }
 
-        // Capacity validation
+        // Check if already registered
+        if (eventRegistrationRepository.existsByUserAndEvent(user, event)) {
+            throw new RuntimeException("User already registered for this event");
+        }
 
+        // Capacity validation
         if (event.getRegistrations() >= event.getMaxCapacity()) {
             throw new RuntimeException(
                 "Event Full! Maximum capacity of "
@@ -63,10 +80,13 @@ public class EventService {
                         + " participants reached."
             );
         }
+
+        // Create and save event registration
+        EventRegistration registration = new EventRegistration(user, event);
+        eventRegistrationRepository.save(registration);
+
         event.setRegistrations(event.getRegistrations() + 1);
         return eventRepository.save(event);
-
-
     }
 
     public List<Event> recommendEvents(String keyword) {
