@@ -21,11 +21,26 @@
     <link href="/css/style.css" rel="stylesheet">
     <link href="/css/ui.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/spinners.css">
+
     <link rel="stylesheet" href="/css/print.css" media="print">
     <link rel="stylesheet" href="/css/hover-effects.css">
     <link rel="stylesheet" href="/css/toast-notifications.css">
 
     <link rel="stylesheet" href="/css/hover-effects.css">
+
+
+
+    <link rel="stylesheet" href="/css/print.css" media="print">
+    <link rel="stylesheet" href="/css/hover-effects.css">
+    <link rel="stylesheet" href="/css/toast-notifications.css">
+
+    <link rel="stylesheet" href="/css/hover-effects.css">
+
+    <link rel="stylesheet" href="/css/print.css" media="print">
+    <link rel="stylesheet" href="/css/hover-effects.css">
+
+    <link rel="stylesheet" href="/css/toast-notifications.css">
+
 
     <link rel="stylesheet" href="/css/back-to-top.css">
     <link rel="stylesheet" href="/css/responsive.css">
@@ -55,10 +70,13 @@
     <link rel="stylesheet" href="/css/shortcuts.css">
 
     <link rel="stylesheet" href="/css/confirm-dialogs.css">
+
     <link rel="stylesheet" href="/css/empty-states.css">
 
 
 
+
+    <link rel="stylesheet" href="/css/empty-states.css">
 
 
 
@@ -103,6 +121,7 @@
                 <a class="nav-link" href="/complaints"><i class="fas fa-exclamation-circle me-1"></i>Complaints</a>
                 <a class="nav-link" href="/events"><i class="fas fa-calendar me-1"></i>Events</a>
                 <a class="nav-link" href="/analytics"><i class="fas fa-chart-bar me-1"></i>Analytics</a>
+                <a class="nav-link" href="/voice-analytics">Voice Analytics</a>
             </div>
         </div>
     </div>
@@ -185,6 +204,12 @@
                     <i class="fas fa-list me-2 text-purple"></i>Recent Complaints
                 </div>
                 <div class="card-body p-0">
+
+
+                    <div th:if="${recentComplaints.empty}" class="text-center text-muted p-4">
+                        No complaints yet. 🎯
+
+
                     <div th:if="${recentComplaints.empty}">
                         <div class="empty-state-small">
                             <div class="empty-state-icon">
@@ -193,6 +218,7 @@
                             <p class="text-muted">No complaints yet! 🎉</p>
                             <p class="small text-muted">Your community is peaceful</p>
                         </div>
+
                     </div>
                     <ul th:unless="${recentComplaints.empty}" class="list-group list-group-flush">
                         <li class="list-group-item" th:each="c : ${recentComplaints}">
@@ -222,6 +248,12 @@
                     <i class="fas fa-history me-2 text-purple"></i>Recent Voice Commands
                 </div>
                 <div class="card-body p-0">
+
+
+                    <div th:if="${recentCommands.empty}" class="text-center text-muted p-4">
+                        No voice commands yet. Try speaking to the assistant above! 🎤
+
+
                     <div th:if="${recentCommands.empty}">
                         <div class="empty-state-small">
                             <div class="empty-state-icon">
@@ -230,6 +262,7 @@
                             <p class="text-muted">No voice commands yet</p>
                             <p class="small text-muted">Click the microphone and try speaking!</p>
                         </div>
+
                     </div>
                     <ul th:unless="${recentCommands.empty}" class="list-group list-group-flush">
                         <li class="list-group-item" th:each="cmd : ${recentCommands}">

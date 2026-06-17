@@ -9,11 +9,21 @@
     <!-- Favicon & Meta Tags -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='50' font-size='80' text-anchor='middle' dy='.3em'%3E🎙️%3C/text%3E%3C/svg%3E">
     <meta name="description" content="Voice-Driven Virtual Customer Success Manager - Complaint Management">
+
     <meta name="keywords" content="voice assistant, customer success, complaints, tracking">
     <meta name="author" content="Bhakkti Gautam">
     <meta name="theme-color" content="#8b5cf6">
     <meta property="og:title" content="VCSM - Complaint Management">
     <meta property="og:description" content="File and track community complaints">
+
+
+    <meta name="keywords" content="voice assistant, customer success, complaints, tracking, priority">
+    <meta name="author" content="Bhakkti Gautam">
+    <meta name="theme-color" content="#8b5cf6">
+    <meta property="og:title" content="VCSM - Complaint Management">
+    <meta property="og:description" content="File and track community complaints with priority levels">
+
+
     <meta name="twitter:card" content="summary_large_image">
     
     <!-- CSS Dependencies -->
@@ -36,10 +46,25 @@
     <link href="/css/ui.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/back-to-top.css">
 
+
     <link rel="stylesheet" href="/css/print.css" media="print">
     <link rel="stylesheet" href="/css/hover-effects.css">
     <link rel="stylesheet" href="/css/toast-notifications.css">
+
+
+    <link rel="stylesheet" href="/css/print.css" media="print">
     <link rel="stylesheet" href="/css/hover-effects.css">
+    <link rel="stylesheet" href="/css/toast-notifications.css">
+
+
+    <link rel="stylesheet" href="/css/hover-effects.css">
+
+    <link rel="stylesheet" href="/css/print.css" media="print">
+    <link rel="stylesheet" href="/css/hover-effects.css">
+
+    <link rel="stylesheet" href="/css/toast-notifications.css">
+
+
     <link rel="stylesheet" href="/css/spinners.css">
     <link rel="stylesheet" href="/css/responsive.css">
 
@@ -55,8 +80,12 @@
     <link rel="stylesheet" href="/css/typing-indicator.css">
 
     <link rel="stylesheet" href="/css/confirm-dialogs.css">
+
     <link rel="stylesheet" href="/css/empty-states.css">
 
+
+
+    <link rel="stylesheet" href="/css/empty-states.css">
 
 
         <!-- Favicon & Meta Tags -->
@@ -97,6 +126,7 @@
                 <a class="nav-link active" href="/complaints">Complaints</a>
                 <a class="nav-link" href="/events">Events</a>
                 <a class="nav-link" href="/analytics">Analytics</a>
+                <a class="nav-link" href="/voice-analytics">Voice Analytics</a>
             </div>
         </div>
     </div>
@@ -105,10 +135,18 @@
 <div class="container mt-4">
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
         <h4 class="fw-bold mb-0"><i class="fas fa-exclamation-circle text-purple me-2"></i>Complaint Management</h4>
-        <button class="btn btn-purple w-100 w-sm-auto" data-bs-toggle="modal" data-bs-target="#fileComplaintModal">
-            <span class="btn-spinner"></span>
-            <span class="btn-text"><i class="fas fa-plus me-1"></i>New Complaint</span>
-        </button>
+        <div class="d-flex gap-2">
+            <button class="btn btn-success btn-sm" onclick="exportCSV()">
+                <i class="fas fa-file-csv me-1"></i> CSV
+            </button>
+            <button class="btn btn-danger btn-sm" onclick="exportPDF()">
+                <i class="fas fa-file-pdf me-1"></i> PDF
+            </button>
+            <button class="btn btn-purple w-100 w-sm-auto" data-bs-toggle="modal" data-bs-target="#fileComplaintModal">
+                <span class="btn-spinner"></span>
+                <span class="btn-text"><i class="fas fa-plus me-1"></i>New Complaint</span>
+            </button>
+        </div>
     </div>
 
     <!-- Stats Row - 2 columns on mobile, 4 on desktop -->
@@ -182,12 +220,19 @@
                         <th>Apt</th>
                         <th>Category</th>
                         <th>Description</th>
+                        <th>Priority</th>
                         <th>Status</th>
                         <th>Filed On</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
+
+
+                    <tr th:if="${complaints.empty}">
+                        <td colspan="8" class="text-center text-muted py-4">No complaints found. File your first complaint! 🎯</td>
+                    </tr>
+
                     <tr th:each="c : ${complaints}">
                         <td th:text="${c.id}">1</td>
                         <td th:text="${c.residentName}">Name</td>
@@ -196,9 +241,21 @@
                             <span class="badge bg-secondary" th:text="${c.category}">CAT</span>
                         </td>
                         <td th:text="${#strings.abbreviate(c.description, 50)}">Desc</td>
+                        <!-- Priority Badge -->
+                        <td>
+                            <span class="badge" 
+                                  th:classappend="${c.priority == 'CRITICAL' ? 'bg-danger' : 
+                                                 (c.priority == 'HIGH' ? 'bg-warning text-dark' : 
+                                                 (c.priority == 'MEDIUM' ? 'bg-info' : 'bg-success'))}"
+                                  th:text="${c.priority}">MEDIUM</span>
+                            <small th:if="${!c.autoAssigned}" class="text-muted d-block" style="font-size: 10px;">(manual)</small>
+                        </td>
+                        <!-- Status Badge -->
                         <td>
                             <span class="badge"
-                                  th:classappend="${c.status.name() == 'OPEN' ? 'bg-danger' : (c.status.name() == 'IN_PROGRESS' ? 'bg-warning text-dark' : (c.status.name() == 'RESOLVED' ? 'bg-success' : 'bg-secondary'))}"
+                                  th:classappend="${c.status.name() == 'OPEN' ? 'bg-danger' : 
+                                                 (c.status.name() == 'IN_PROGRESS' ? 'bg-warning text-dark' : 
+                                                 (c.status.name() == 'RESOLVED' ? 'bg-success' : 'bg-secondary'))}"
                                   th:text="${c.status}">Status</span>
                         </td>
                         <td th:text="${#temporals.format(c.createdAt, 'dd MMM yyyy')}">Date</td>
@@ -206,6 +263,10 @@
                             <button class="btn btn-sm btn-outline-secondary me-1" onclick="updateComplaintStatus(this, ${c.id})">
                                 <span class="btn-spinner"></span>
                                 <span class="btn-text">Update</span>
+                            </button>
+                            <button class="btn btn-sm btn-outline-info me-1" onclick="updatePriority(${c.id})">
+                                <span class="btn-spinner"></span>
+                                <span class="btn-text">Priority</span>
                             </button>
                             <button class="btn btn-sm btn-outline-danger" onclick="confirmDeleteComplaint(${c.id})">
                                 <span class="btn-spinner"></span>
@@ -309,6 +370,22 @@
         }, 1000);
     });
 
+
+    // Export Functions
+    function exportCSV() {
+        if (typeof toast !== 'undefined') {
+            toast.info('Downloading CSV...', '📥 Export');
+        }
+        window.location.href = '/api/export/complaints/csv';
+    }
+
+    function exportPDF() {
+        if (typeof toast !== 'undefined') {
+            toast.info('Downloading PDF...', '📥 Export');
+        }
+        window.location.href = '/api/export/complaints/pdf';
+    }
+
     // Submit complaint with toast
     function submitComplaint() {
         const btn = event.target.closest('button');
@@ -347,7 +424,14 @@
             if (btn) btn.classList.remove('loading');
             if (data.id) {
                 if (typeof toast !== 'undefined') {
+
                     toast.success(`Complaint #${data.id} filed successfully!`, 'Success');
+
+
+                    toast.success(`Complaint #${data.id} filed successfully!`, 'Success');
+
+                    toast.success(`Complaint #${data.id} filed with priority ${data.priority || 'MEDIUM'}!`, 'Success');
+
                 } else {
                     alert('Complaint filed! ID: ' + data.id);
                 }
@@ -380,10 +464,9 @@
             return;
         }
         
-        fetch(`/api/complaints/${id}/status`, {
+        fetch(`/api/complaints/${id}/status?status=${newStatus}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: newStatus })
+            headers: { 'Content-Type': 'application/json' }
         })
         .then(r => r.json())
         .then(data => {
@@ -412,6 +495,43 @@
             }
         });
     }
+
+
+    // Update priority manually
+    function updatePriority(id) {
+        const newPriority = prompt('Enter new priority (CRITICAL, HIGH, MEDIUM, LOW):');
+        if (!newPriority) return;
+        
+        fetch(`/api/complaints/${id}/priority?priority=${newPriority.toUpperCase()}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.id) {
+                if (typeof toast !== 'undefined') {
+                    toast.success(`Complaint #${id} priority updated to ${newPriority.toUpperCase()}`, 'Priority Updated');
+                } else {
+                    alert('Priority updated!');
+                }
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                if (typeof toast !== 'undefined') {
+                    toast.error('Error updating priority', 'Error');
+                } else {
+                    alert('Error updating priority');
+                }
+            }
+        })
+        .catch(err => {
+            if (typeof toast !== 'undefined') {
+                toast.error('Network error. Please try again.', 'Error');
+            } else {
+                alert('Network error: ' + err.message);
+            }
+        });
+    }
+
 
     // Delete complaint with confirmation dialog
     function confirmDeleteComplaint(id) {
