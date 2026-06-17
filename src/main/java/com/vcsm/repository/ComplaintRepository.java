@@ -3,6 +3,7 @@ package com.vcsm.repository;
 import com.vcsm.model.Complaint;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -43,6 +44,12 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
 
     @Query("SELECT c.priority, COUNT(c) FROM Complaint c GROUP BY c.priority")
     List<Object[]> countByPriority();
+
+    @Query("SELECT c.id FROM Complaint c")
+List<Long> findAllIds();
+
+@Query("SELECT c.id FROM Complaint c WHERE c.status = :status")
+List<Long> findIdsByStatus(@Param("status") Complaint.ComplaintStatus status);
 
     Page<Complaint> findAll(Pageable pageable);
 Page<Complaint> findByResidentUsername(String username, Pageable pageable);

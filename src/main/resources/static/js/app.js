@@ -298,3 +298,124 @@ async function registerEvent(id) {
         console.error('Error registering:', err);
     }
 }
+
+// ===== BULK OPERATIONS =====
+let selectedIds = [];
+
+function toggleAllCheckboxes(master) {
+    document.querySelectorAll('.complaint-checkbox').forEach(cb => {
+        cb.checked = master.checked;
+    });
+    updateSelectedCount();
+}
+
+function updateSelectedCount() {
+    selectedIds = [];
+    document.querySelectorAll('.complaint-checkbox:checked').forEach(cb => {
+        selectedIds.push(parseInt(cb.value));
+    });
+    const countEl = document.getElementById('selectedCount');
+    if (countEl) {
+        countEl.textContent = selectedIds.length + ' selected';
+    }
+}
+
+function selectAll() {
+    document.querySelectorAll('.complaint-checkbox').forEach(cb => cb.checked = true);
+    updateSelectedCount();
+}
+
+function deselectAll() {
+    document.querySelectorAll('.complaint-checkbox').forEach(cb => cb.checked = false);
+    updateSelectedCount();
+}
+
+function bulkUpdateStatus() {
+    const status = document.getElementById('bulkStatus').value;
+    if (!status) {
+        if (typeof toast !== 'undefined') {
+            toast.warning('Please select a status', 'Warning');
+        }
+        return;
+    }
+    if (selectedIds.length === 0) {
+        if (typeof toast !== 'undefined') {
+            toast.warning('Please select at least one complaint', 'Warning');
+        }
+        return;
+    }
+
+    fetch('/api/complaints/bulk/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            complaintIds: selectedIds,
+            status: status
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success > 0) {
+            if (typeof toast !== 'undefined') {
+                toast.success(data.message, 'Success');
+            }
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            if (typeof toast !== 'undefined') {
+                toast.error('Bulk update failed', 'Error');
+            }
+        }
+    })
+    .catch(err => {
+        if (typeof toast !== 'undefined') {
+            toast.error('Network error', 'Error');
+        }
+    });
+}
+
+function bulkResolve() {
+    if (selectedIds.length === 0) {
+        if (typeof toast !== 'undefined') {
+            toast.warning('Please select at least one complaint', 'Warning');
+        }
+        return;
+    }
+
+    if (!confirm('Are you sure you want to resolve ' + selectedIds.length + ' complaints?')) {
+        return;
+    }
+
+    fetch('/api/complaints/bulk/resolve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            complaintIds: selectedIds,
+            resolutionNotes: 'Resolved via bulk action'
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success > 0) {
+            if (typeof toast !== 'undefined') {
+                toast.success(data.message, 'Success');
+            }
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            if (typeof toast !== 'undefined') {
+                toast.error('Bulk resolve failed', 'Error');
+            }
+        }
+    })
+    .catch(err => {
+        if (typeof toast !== 'undefined') {
+            toast.error('Network error', 'Error');
+        }
+    });
+}
+
+// Event listeners for checkboxes
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.complaint-checkbox').forEach(cb => {
+        cb.addEventListener('change', updateSelectedCount);
+    });
+});
