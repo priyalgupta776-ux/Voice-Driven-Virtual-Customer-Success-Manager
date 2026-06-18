@@ -96,6 +96,9 @@ public class ComplaintService {
         return complaintRepository.findByResidentUsernameOrderByCreatedAtDesc(username);
     }
 
+
+    // Pagination method
+
     public Page<Complaint> getPaginatedComplaints(Pageable pageable) {
         if (isAdmin()) {
             return complaintRepository.findAll(pageable);
