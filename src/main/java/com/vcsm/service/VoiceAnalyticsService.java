@@ -7,6 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+
+
+import java.time.format.DateTimeFormatter;
+
 import java.util.*;
 
 @Service
@@ -20,6 +24,7 @@ public class VoiceAnalyticsService {
         voiceAnalyticsRepository.save(analytics);
     }
     
+
     public Map<String, Object> getSummary() {
         Map<String, Object> stats = new LinkedHashMap<>();
         
@@ -29,6 +34,20 @@ public class VoiceAnalyticsService {
         long uniqueUsers = voiceAnalyticsRepository.getUniqueUsersCount();
         stats.put("uniqueUsers", uniqueUsers);
         
+
+    public Map<String, Object> getAnalytics() {
+        Map<String, Object> stats = new LinkedHashMap<>();
+        
+        // Total commands
+        long totalCommands = voiceAnalyticsRepository.count();
+        stats.put("totalCommands", totalCommands);
+        
+        // Unique users
+        long uniqueUsers = voiceAnalyticsRepository.getUniqueUsersCount();
+        stats.put("uniqueUsers", uniqueUsers);
+        
+        // Success rate
+
         List<Object[]> successData = voiceAnalyticsRepository.countBySuccess();
         long successCount = 0;
         long failCount = 0;
@@ -41,9 +60,17 @@ public class VoiceAnalyticsService {
         double successRate = totalCommands > 0 ? (successCount * 100.0 / totalCommands) : 0;
         stats.put("successRate", Math.round(successRate));
         
+
         Double avgResponseTime = voiceAnalyticsRepository.getAverageResponseTime();
         stats.put("averageResponseTime", avgResponseTime != null ? Math.round(avgResponseTime) : 0);
         
+
+        // Average response time
+        Double avgResponseTime = voiceAnalyticsRepository.getAverageResponseTime();
+        stats.put("averageResponseTime", avgResponseTime != null ? Math.round(avgResponseTime) : 0);
+        
+        // Recent commands (last 7 days)
+
         LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
         long recentCommands = voiceAnalyticsRepository.countRecentCommands(sevenDaysAgo);
         stats.put("recentCommands", recentCommands);
