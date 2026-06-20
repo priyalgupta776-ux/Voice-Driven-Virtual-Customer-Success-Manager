@@ -4,9 +4,11 @@ import com.vcsm.model.Complaint;
 import com.vcsm.model.User;
 import com.vcsm.repository.ComplaintRepository;
 import com.vcsm.repository.UserRepository;
+import com.vcsm.specification.ComplaintSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,6 +26,12 @@ public class ComplaintService {
     private ComplaintRepository complaintRepository;
 
     @Autowired
+
+   private AuditLogService auditLogService;
+
+     @Autowired
+     private NotificationService notificationService;
+
     private PriorityClassifierService priorityClassifierService;
 
     @Autowired
@@ -57,7 +65,6 @@ public class ComplaintService {
         return userRepository.findByEmail(username).orElse(null);
     }
 
-
     private User getComplaintUser(Long complaintId) {
         Optional<Complaint> complaintOpt = complaintRepository.findById(complaintId);
         if (complaintOpt.isEmpty()) return null;
@@ -67,13 +74,11 @@ public class ComplaintService {
         return userRepository.findByEmail(username).orElse(null);
     }
 
-
     public Complaint fileComplaint(Complaint complaint) {
         String username = currentUsername();
         if (username == null) throw new RuntimeException("Unauthorized");
 
         complaint.setResidentUsername(username);
-
         
         String priority = priorityClassifierService.classifyPriority(
             complaint.getDescription(), 
@@ -87,11 +92,8 @@ public class ComplaintService {
         Complaint saved = complaintRepository.save(complaint);
 
         log.info("📝 Filing complaint for user: " + username + " with priority: " + priority);
-        
-
 
         // Log user activity
-
         try {
             User user = getCurrentUser();
             if (user != null) {
@@ -104,13 +106,6 @@ public class ComplaintService {
         } catch (Exception e) {
             log.warning("Failed to log user activity: " + e.getMessage());
         }
-        
-
-        complaint.setCreatedAt(LocalDateTime.now());
-        complaint.setStatus(Complaint.ComplaintStatus.OPEN);
-
-        log.info("Filing complaint for user: " + username);
-        Complaint saved = complaintRepository.save(complaint);
 
         // Send notification to admin
         try {
@@ -129,7 +124,6 @@ public class ComplaintService {
             log.warning("Failed to send notification: " + e.getMessage());
         }
 
-
         return saved;
     }
 
@@ -141,15 +135,32 @@ public class ComplaintService {
         return complaintRepository.findByResidentUsernameOrderByCreatedAtDesc(username);
     }
 
-
     // Pagination method
-
     public Page<Complaint> getPaginatedComplaints(Pageable pageable) {
         if (isAdmin()) {
             return complaintRepository.findAll(pageable);
         }
         String username = currentUsername();
         return complaintRepository.findByResidentUsername(username, pageable);
+    }
+
+    // ===== SEARCH METHOD =====
+    public Page<Complaint> searchComplaints(String keyword, String status, String category, 
+                                            String priority, LocalDateTime startDate, 
+                                            LocalDateTime endDate, Pageable pageable) {
+        Specification<Complaint> spec = Specification
+            .where(ComplaintSpecification.hasKeyword(keyword))
+            .and(ComplaintSpecification.hasStatus(status))
+            .and(ComplaintSpecification.hasCategory(category))
+            .and(ComplaintSpecification.hasPriority(priority))
+            .and(ComplaintSpecification.createdBetween(startDate, endDate));
+
+        if (!isAdmin()) {
+            String username = currentUsername();
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("residentUsername"), username));
+        }
+
+        return complaintRepository.findAll(spec, pageable);
     }
 
     public Optional<Complaint> getComplaintById(Long id) {
@@ -192,11 +203,7 @@ public class ComplaintService {
         
         Complaint updated = complaintRepository.save(complaint);
 
-        
-
-
         // Log user activity
-
         try {
             User admin = userRepository.findByEmail(currentUsername()).orElse(null);
             if (admin != null) {
@@ -221,7 +228,34 @@ public class ComplaintService {
         } catch (Exception e) {
             log.warning("Failed to log user activity: " + e.getMessage());
         }
-        
+
+        // Send notification to complaint owner
+        try {
+            User user = getComplaintUser(id);
+            if (user != null) {
+                String message = "Your complaint #" + id + " status changed from " + oldStatus + " to " + newStatus;
+                notificationService.sendNotification(user,
+                    notificationService.createNotification(
+                        user,
+                        "Complaint Status Updated",
+                        message,
+                        "INFO"
+                    )
+                );
+            }
+            
+            notificationService.sendGlobalNotification(
+                notificationService.createNotification(
+                    null,
+                    "Complaint Status Updated",
+                    "Complaint #" + id + " status updated to " + newStatus + " by admin",
+                    "INFO"
+                )
+            );
+        } catch (Exception e) {
+            log.warning("Failed to send notification: " + e.getMessage());
+        }
+
         return updated;
     }
 
@@ -240,7 +274,6 @@ public class ComplaintService {
         complaint.setAutoAssigned(false);
         
         Complaint updated = complaintRepository.save(complaint);
-        
 
         try {
             User admin = userRepository.findByEmail(currentUsername()).orElse(null);
@@ -266,35 +299,6 @@ public class ComplaintService {
         } catch (Exception e) {
             log.warning("Failed to log user activity: " + e.getMessage());
         }
-        
-
-        // Send notification to complaint owner
-        try {
-            User user = getComplaintUser(id);
-            if (user != null) {
-                String message = "Your complaint #" + id + " status changed from " + oldStatus + " to " + newStatus;
-                notificationService.sendNotification(user,
-                    notificationService.createNotification(
-                        user,
-                        "Complaint Status Updated",
-                        message,
-                        "INFO"
-                    )
-                );
-            }
-            
-            // Also send global notification for admins
-            notificationService.sendGlobalNotification(
-                notificationService.createNotification(
-                    null,
-                    "Complaint Status Updated",
-                    "Complaint #" + id + " status updated to " + newStatus + " by admin",
-                    "INFO"
-                )
-            );
-        } catch (Exception e) {
-            log.warning("Failed to send notification: " + e.getMessage());
-        }
 
         return updated;
     }
@@ -303,8 +307,6 @@ public class ComplaintService {
         if (!isAdmin()) {
             throw new AccessDeniedException("Only admins can delete complaints");
         }
-        
-
 
         try {
             User admin = userRepository.findByEmail(currentUsername()).orElse(null);
@@ -327,6 +329,7 @@ public class ComplaintService {
             }
         } catch (Exception e) {
             log.warning("Failed to log user activity: " + e.getMessage());
+        }
 
         // Send notification before deletion
         try {
@@ -343,7 +346,6 @@ public class ComplaintService {
             }
         } catch (Exception e) {
             log.warning("Failed to send notification: " + e.getMessage());
-
         }
         
         complaintRepository.deleteById(id);
@@ -375,7 +377,6 @@ public class ComplaintService {
         return map;
     }
 
-    
     public Map<String, Long> getPriorityStats() {
         if (!isAdmin()) {
             throw new AccessDeniedException("Only admins can access analytics");
@@ -388,5 +389,4 @@ public class ComplaintService {
         }
         return stats;
     }
-
 }
