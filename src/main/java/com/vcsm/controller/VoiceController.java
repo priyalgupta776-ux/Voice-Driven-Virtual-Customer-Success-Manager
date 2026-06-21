@@ -3,6 +3,8 @@ package com.vcsm.controller;
 import com.vcsm.service.LanguageDetectionService;
 import com.vcsm.service.HindiCommandMapper;
 import com.vcsm.model.VoiceCommand;
+import org.springframework.http.HttpStatus;
+import com.vcsm.dto.ErrorResponse;
 import com.vcsm.service.OmnidimService;
 import com.vcsm.service.SentimentAnalysisService;
 import com.vcsm.model.User;
@@ -37,7 +39,7 @@ public class VoiceController {
     private HindiCommandMapper hindiCommandMapper;
 
     @PostMapping("/command")
-    public ResponseEntity<Map<String, Object>> command(@RequestBody Map<String, String> body) {
+    public ResponseEntity<?> command(@RequestBody Map<String, String> body) {
         String transcript = body.get("transcript");
         
         if (transcript == null || transcript.isBlank()) {
