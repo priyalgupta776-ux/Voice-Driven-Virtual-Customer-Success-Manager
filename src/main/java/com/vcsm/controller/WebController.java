@@ -72,6 +72,7 @@ public class WebController {
     }
 
 
+
     @GetMapping("/complaints")
 public String complaintsPage(
         @RequestParam(defaultValue = "0") int page,
@@ -87,6 +88,7 @@ public String complaintsPage(
     
     return "complaints";
 }
+
 
     @GetMapping("/voice-analytics")
     public String voiceAnalytics() {
@@ -248,6 +250,13 @@ public String complaintsPage(
     public String profile() {
         return "profile";
 
+    }
+    @GetMapping("/audit-logs")
+public String auditLogs() {
+    return "audit-logs";
+}
+
+
     @GetMapping("/interaction-history")
     public String interactionHistory(Model model) {
         try {
@@ -269,5 +278,10 @@ public String complaintsPage(
         return "interaction-history";
 
     }
+
+
+
+    }
+
 
 }

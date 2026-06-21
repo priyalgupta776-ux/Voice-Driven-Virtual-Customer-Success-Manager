@@ -379,6 +379,8 @@ async function registerEvent(id) {
         console.error('Error registering:', err);
     }
 
+
+
 }
 
 }
@@ -502,6 +504,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.complaint-checkbox').forEach(cb => {
         cb.addEventListener('change', updateSelectedCount);
     });
+
+
+});
+
 
 });
 
@@ -668,6 +674,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 });
+
 
 });
 

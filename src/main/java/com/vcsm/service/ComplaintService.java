@@ -41,7 +41,11 @@ public class ComplaintService {
     private UserRepository userRepository;
 
     @Autowired
+
+    private AuditLogService auditLogService;
+
     private NotificationService notificationService;
+
 
 
     private boolean isAdmin() {
@@ -209,6 +213,17 @@ public class ComplaintService {
                     "Updated complaint #" + id + " status from " + oldStatus + " to " + newStatus, 
                     id
                 );
+                
+                // Audit Log
+                auditLogService.logAction(
+                    admin,
+                    "UPDATE_STATUS",
+                    "Updated complaint #" + id + " status from " + oldStatus + " to " + newStatus,
+                    "COMPLAINT",
+                    id,
+                    oldStatus.toString(),
+                    newStatus.toString()
+                );
             }
         } catch (Exception e) {
             log.warning("Failed to log user activity: " + e.getMessage());
@@ -269,6 +284,17 @@ public class ComplaintService {
                     "Updated complaint #" + id + " priority from " + oldPriority + " to " + newPriority, 
                     id
                 );
+                
+                // Audit Log
+                auditLogService.logAction(
+                    admin,
+                    "UPDATE_PRIORITY",
+                    "Updated complaint #" + id + " priority from " + oldPriority + " to " + newPriority,
+                    "COMPLAINT",
+                    id,
+                    oldPriority,
+                    newPriority
+                );
             }
         } catch (Exception e) {
             log.warning("Failed to log user activity: " + e.getMessage());
@@ -289,6 +315,15 @@ public class ComplaintService {
                     admin, 
                     "COMPLAINT", 
                     "Deleted complaint #" + id, 
+                    id
+                );
+                
+                // Audit Log
+                auditLogService.logAction(
+                    admin,
+                    "DELETE_COMPLAINT",
+                    "Deleted complaint #" + id,
+                    "COMPLAINT",
                     id
                 );
             }
