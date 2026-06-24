@@ -6,6 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import jakarta.annotation.PreDestroy;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -21,6 +22,11 @@ public class LiveDashboardController {
     private LiveDashboardService liveDashboardService;
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+    @PreDestroy
+    public void shutdown() {
+        scheduler.shutdownNow();
+    }
 
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter streamEvents() {
