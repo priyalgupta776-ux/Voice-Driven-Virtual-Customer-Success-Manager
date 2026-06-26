@@ -36,6 +36,8 @@ public class SecurityConfig {
 
     @Autowired
     private HmacAuthenticationFilter hmacAuthenticationFilter;
+
+    @Autowired
     private UserDetailsServiceImpl userDetailsService;
 
     @Bean
