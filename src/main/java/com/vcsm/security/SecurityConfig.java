@@ -67,6 +67,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/voice/command").permitAll()
                         .requestMatchers("/api/voice/feedback/**").permitAll()
                         .requestMatchers("/api/chatbot/**").permitAll()
+                        .requestMatchers("/api/iot/alert").permitAll()
+                        .requestMatchers("/api/translation/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )
