@@ -180,6 +180,129 @@ omnidim.api.key=YOUR_ACTUAL_API_KEY
 
 ---
 
+## 📘 API Request & Response Examples
+
+### 📋 Create Complaint
+
+**Request**
+
+```http
+POST /api/complaints
+Content-Type: application/json
+```
+
+```json
+{
+  "residentName": "John Doe",
+  "description": "Water leakage in Block A.",
+  "category": "MAINTENANCE",
+  "apartmentNumber": "A-204",
+  "contactEmail": "john@example.com"
+}
+```
+
+**Example Response**
+
+```json
+{
+  "id": 1,
+  "residentName": "John Doe",
+  "description": "Water leakage in Block A.",
+  "status": "OPEN",
+  "category": "MAINTENANCE",
+  "apartmentNumber": "A-204",
+  "contactEmail": "john@example.com",
+  "priority": "MEDIUM",
+  "autoAssigned": true
+}
+```
+
+---
+
+### 📅 Create Event
+
+**Request**
+
+```http
+POST /api/events
+Content-Type: application/json
+```
+
+```json
+{
+  "name": "Community Clean-up Drive",
+  "description": "Join the neighborhood clean-up event.",
+  "category": "SOCIAL",
+  "location": "Community Park",
+  "eventDate": "2026-07-10T09:00:00",
+  "maxCapacity": 100,
+  "organizer": "Community Association"
+}
+```
+
+**Example Response**
+
+```json
+{
+  "id": 5,
+  "name": "Community Clean-up Drive",
+  "category": "SOCIAL",
+  "location": "Community Park",
+  "eventDate": "2026-07-10T09:00:00",
+  "registrations": 0,
+  "active": true
+}
+```
+
+---
+
+### 🎤 Process Voice Command
+
+**Request**
+
+```http
+POST /api/voice/command
+Content-Type: application/json
+```
+
+```json
+{
+  "transcript": "Show upcoming events"
+}
+```
+
+**Example Response**
+
+```json
+{
+  "originalText": "Show upcoming events",
+  "detectedLanguage": "en",
+  "response": "Here are the upcoming events.",
+  "success": true
+}
+```
+
+---
+
+### 📊 Complaint Statistics
+
+**Request**
+
+```http
+GET /api/complaints/stats
+```
+
+**Example Response**
+
+```json
+{
+  "OPEN": 12,
+  "IN_PROGRESS": 5,
+  "RESOLVED": 18,
+  "CLOSED": 4
+}
+```
+
 ## 📁 Project Structure
 
 ```
