@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,7 @@ public class VoiceTranslationService {
     /**
      * Translate text from source language to target language
      */
+    @CircuitBreaker(name = "translationService", fallbackMethod = "translateTextFallback")
     public String translateText(String text, String sourceLang, String targetLang) {
         if (text == null || text.isEmpty()) {
             return "";
@@ -91,8 +93,7 @@ public class VoiceTranslationService {
             return text;
             
         } catch (Exception e) {
-            log.warn("Translation API call failed, using fallback: {}", e.getMessage(), e);
-            return getFallbackTranslation(text, sourceLang, targetLang);
+            throw new RuntimeException("Translation API call failed", e);
         }
     }
 
@@ -102,6 +103,11 @@ public class VoiceTranslationService {
     public String autoTranslate(String text, String targetLang) {
         String sourceLang = languageDetector.detectLanguage(text);
         return translateText(text, sourceLang, targetLang);
+    }
+
+    public String translateTextFallback(String text, String sourceLang, String targetLang, Throwable t) {
+        log.warn("Circuit breaker triggered for translation service: {}", t.getMessage());
+        return "Service temporarily unavailable, please try again.";
     }
 
     /**
